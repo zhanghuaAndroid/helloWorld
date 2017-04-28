@@ -4,7 +4,7 @@ import org.litepal.crud.DataSupport;
 
 /**
  * Description: ：
- * Company      : 北京云磅科技
+ * Company      :
  * Author       :
  * E-Mail       :
  * Date         ：2017/4/28

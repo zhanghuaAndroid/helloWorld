@@ -22,5 +22,6 @@ public class AppApplication extends Application {
         super.onCreate();
         LitePalApplication.initialize(mContext);
         mContext = getApplicationContext();
+        //4001c9cd6c37490e8d0fbbc899b7c8d0
     }
 }
