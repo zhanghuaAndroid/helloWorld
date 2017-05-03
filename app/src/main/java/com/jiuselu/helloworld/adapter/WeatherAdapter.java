@@ -2,11 +2,16 @@ package com.jiuselu.helloworld.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.jiuselu.helloworld.R;
+import com.jiuselu.helloworld.ui.UIUtils;
+
+import java.util.ArrayList;
 
 /**
  * Description: ：
@@ -16,36 +21,48 @@ import com.jiuselu.helloworld.R;
  * Date         ：2017/4/28
  * Tell         :
  */
-public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHolder>{
+public class WeatherAdapter extends BaseAdapter {
 
-    private Context cxt;
-    public WeatherAdapter(Context cxt){
-        this.cxt = cxt;
+    private static final String TAG = "WeatherAdapter";
+
+    private ArrayList<String> dataList;
+
+    public WeatherAdapter(ArrayList<String> dataList) {
+        this.dataList = dataList;
+    }
+
+
+    @Override
+    public int getCount() {
+        return dataList == null ? 0 : dataList.size();
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = View.inflate(cxt, R.layout.layout_weather_item, null);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+    public String getItem(int i) {
+        return dataList.get(i);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
+    public long getItemId(int i) {
+        return i;
     }
 
     @Override
-    public int getItemCount() {
-        return 0;
-    }
-
-    static class ViewHolder extends RecyclerView.ViewHolder{
-        TextView tvAddress;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            tvAddress = (TextView) itemView.findViewById(R.id.tv_address);
+    public View getView(int i, View view, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (view == null) {
+            view = View.inflate(UIUtils.getContext(), R.layout.layout_weather_item, null);
+            holder = new ViewHolder();
+            holder.tvAddress = (TextView) view.findViewById(R.id.tv_address);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
         }
+        holder.tvAddress.setText(getItem(i));
+        return view;
     }
 
+    static class ViewHolder {
+        public TextView tvAddress;
+    }
 }

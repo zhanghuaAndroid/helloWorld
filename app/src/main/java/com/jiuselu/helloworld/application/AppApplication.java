@@ -20,7 +20,7 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LitePalApplication.initialize(mContext);
+        LitePalApplication.initialize(this);
         mContext = getApplicationContext();
         //4001c9cd6c37490e8d0fbbc899b7c8d0
     }
