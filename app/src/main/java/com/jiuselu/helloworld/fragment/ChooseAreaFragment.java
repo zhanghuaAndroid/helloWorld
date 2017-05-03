@@ -2,6 +2,7 @@ package com.jiuselu.helloworld.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jiuselu.helloworld.R;
+import com.jiuselu.helloworld.activity.MainActivity;
+import com.jiuselu.helloworld.activity.WeatherActivity;
 import com.jiuselu.helloworld.adapter.WeatherAdapter;
 import com.jiuselu.helloworld.db.City;
 import com.jiuselu.helloworld.db.County;
@@ -108,11 +111,25 @@ public class ChooseAreaFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (currentLevel == LEVEL_PROVINCE) {
+                    //省
                     selectProvince = provinceList.get(i);
                     queryCities();
                 } else if (currentLevel == LEVEL_CITY) {
+                    //市
                     selectCity = cities.get(i);
                     queryCouny();
+                }else if(currentLevel == LEVEL_COUNTY){
+                    String weatherId = counties.get(i).getWeatherId();
+                    //县
+                    if (mActivity instanceof MainActivity){
+                        Intent intent = new Intent(mActivity, WeatherActivity.class);
+                        intent.putExtra("weatherId",weatherId);
+                        startActivity(intent);
+                        mActivity.finish();
+                    }else if (mActivity instanceof WeatherActivity){
+                        WeatherActivity wActivity = (WeatherActivity)getActivity();
+
+                    }
                 }
             }
         });
