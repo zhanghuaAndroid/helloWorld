@@ -1,8 +1,13 @@
 package com.jiuselu.helloworld.fragment;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +16,18 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.jiuselu.helloworld.R;
+import com.jiuselu.helloworld.activity.WeatherActivity;
+import com.jiuselu.helloworld.bean.WeatherInfo;
+import com.jiuselu.helloworld.utils.HttpUtil;
+
+import java.io.IOException;
+import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Description: ：
@@ -45,6 +61,8 @@ public class WeatherInfoFragment extends Fragment {
     private TextView travelText;
     private TextView ultravioletRayText;
     private int id;
+    public DrawerLayout drawerLayout;
+    private String weatherId;
 
     public void setId(int id){
         this.id = id;
@@ -52,6 +70,9 @@ public class WeatherInfoFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        weatherId = getActivity().getIntent().getStringExtra("weatherId");
+
         view = inflater.inflate(R.layout.fragment_weather_info, container, false);
         initView();
         return view;
@@ -77,7 +98,51 @@ public class WeatherInfoFragment extends Fragment {
         sportText = (TextView) view.findViewById(R.id.sport_text);
         travelText = (TextView) view.findViewById(R.id.travel_text);
         ultravioletRayText = (TextView) view.findViewById(R.id.ultraviolet_ray_text);
+        drawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
 
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        btnHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((WeatherActivity)getActivity()).drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+        requestWeather(weatherId);
+
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryDark);
+
+        //下拉刷新
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+            }
+        });
+    }
+
+    /**
+     * 请求网络获取天气信息
+     * @param weatherId
+     */
+    private void requestWeather(final String weatherId) {
+        String WeatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=4001c9cd6c37490e8d0fbbc899b7c8d0";
+        HttpUtil.sendOkHttpRequest(WeatherUrl, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "onFailure:   失败" + e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String weatherInfo = response.body().string();
+                Log.d(TAG, "onResponse: 天气信息：" + weatherInfo);
+                Gson gson = new Gson();
+                WeatherInfo weatherInfos = gson.fromJson(weatherInfo, WeatherInfo.class);
+                List<WeatherInfo.HeWeatherBean> heWeather = weatherInfos.getHeWeather();
+                for (WeatherInfo.HeWeatherBean bean : heWeather){
+
+                }
+            }
+        });
     }
 }

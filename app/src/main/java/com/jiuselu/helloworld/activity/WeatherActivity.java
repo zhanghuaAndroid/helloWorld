@@ -30,7 +30,7 @@ public class WeatherActivity extends AppCompatActivity {
 
     private static final String TAG = "WeatherActivity";
     private ImageView ivBg;
-    private DrawerLayout drawerLayout;
+    public DrawerLayout drawerLayout;
     private ViewPager viewPager;
     private ChooseAreaFragment chooseFragment;
     private LinearLayout viewGroup;
