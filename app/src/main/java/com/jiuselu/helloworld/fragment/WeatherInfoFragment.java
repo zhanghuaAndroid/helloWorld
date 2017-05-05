@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.jiuselu.helloworld.R;
 import com.jiuselu.helloworld.activity.WeatherActivity;
 import com.jiuselu.helloworld.bean.WeatherInfo;
+import com.jiuselu.helloworld.ui.UIUtils;
 import com.jiuselu.helloworld.utils.HttpUtil;
 
 import java.io.IOException;
@@ -63,8 +64,11 @@ public class WeatherInfoFragment extends Fragment {
     private int id;
     public DrawerLayout drawerLayout;
     private String weatherId;
+    private TextView pm10Text;
+    private TextView dirText;
+    private TextView scText;
 
-    public void setId(int id){
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -99,11 +103,14 @@ public class WeatherInfoFragment extends Fragment {
         travelText = (TextView) view.findViewById(R.id.travel_text);
         ultravioletRayText = (TextView) view.findViewById(R.id.ultraviolet_ray_text);
         drawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
+        pm10Text = (TextView) view.findViewById(R.id.pm10_text);
+        dirText = (TextView) view.findViewById(R.id.dir_text);
+        scText = (TextView) view.findViewById(R.id.sc_text);
 
         btnHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((WeatherActivity)getActivity()).drawerLayout.openDrawer(GravityCompat.START);
+                ((WeatherActivity) getActivity()).drawerLayout.openDrawer(GravityCompat.START);
             }
         });
 
@@ -122,6 +129,7 @@ public class WeatherInfoFragment extends Fragment {
 
     /**
      * 请求网络获取天气信息
+     *
      * @param weatherId
      */
     private void requestWeather(final String weatherId) {
@@ -135,13 +143,47 @@ public class WeatherInfoFragment extends Fragment {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String weatherInfo = response.body().string();
-                Log.d(TAG, "onResponse: 天气信息：" + weatherInfo);
+                //Log.d(TAG, "onResponse: 天气信息：" + weatherInfo);
                 Gson gson = new Gson();
                 WeatherInfo weatherInfos = gson.fromJson(weatherInfo, WeatherInfo.class);
                 List<WeatherInfo.HeWeatherBean> heWeather = weatherInfos.getHeWeather();
-                for (WeatherInfo.HeWeatherBean bean : heWeather){
+                WeatherInfo.HeWeatherBean heWeatherBean = heWeather.get(0);
+                final WeatherInfo.HeWeatherBean.AqiBean aqi = heWeatherBean.getAqi();
+                final WeatherInfo.HeWeatherBean.BasicBean basic = heWeatherBean.getBasic();
+                final List<WeatherInfo.HeWeatherBean.DailyForecastBean> dailyForecast = heWeatherBean.getDaily_forecast();
 
-                }
+                List<WeatherInfo.HeWeatherBean.HourlyForecastBean> hourlyForecast = heWeatherBean.getHourly_forecast();
+                WeatherInfo.HeWeatherBean.NowBean now = heWeatherBean.getNow();
+                final WeatherInfo.HeWeatherBean.SuggestionBean suggestion = heWeatherBean.getSuggestion();
+                String status = heWeatherBean.getStatus();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "run: 集合热：" + dailyForecast.size());
+                        tvTitle.setText(basic.getCity());
+                        degreeText.setText(dailyForecast.get(0).getTmp().getMax() + "℃");
+                        weatherInfoText.setText(dailyForecast.get(0).getCond().getTxt_d());
+                        dirText.setText(dailyForecast.get(0).getWind().getDir());
+                        scText.setText(dailyForecast.get(0).getWind().getSc() + "级");
+
+                        View view = View.inflate(UIUtils.getContext(), R.layout.hourly_forecast_item, null);
+                        TextView hourlyForecastItemText = (TextView) view.findViewById(R.id.hourly_forecast_time_text);
+                        //hourlyForecastItemText.setText();
+                        hourlyForecastLayout.addView(view);
+                        airQualityText.setText(aqi.getCity().getQlty());
+                        aqiText.setText(aqi.getCity().getAqi());
+                        pm25Text.setText(aqi.getCity().getPm25());
+                        pm10Text.setText(aqi.getCity().getPm10());
+                        tvUpdateTime.setText(basic.getUpdate().getLoc());
+                        comfortText.setText(suggestion.getComf().getTxt());
+                        wearText.setText(suggestion.getTrav().getTxt());
+                        fluText.setText(suggestion.getFlu().getTxt());
+                        carWashText.setText(suggestion.getCw().getTxt());
+                        sportText.setText(suggestion.getSport().getTxt());
+                        travelText.setText(suggestion.getDrsg().getTxt());
+                        ultravioletRayText.setText(suggestion.getUv().getTxt());
+                    }
+                });
             }
         });
     }
