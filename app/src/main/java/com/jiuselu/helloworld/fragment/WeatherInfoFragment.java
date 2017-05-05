@@ -122,7 +122,7 @@ public class WeatherInfoFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
+                requestWeather(weatherId);
             }
         });
     }
@@ -138,52 +138,56 @@ public class WeatherInfoFragment extends Fragment {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.d(TAG, "onFailure:   失败" + e);
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String weatherInfo = response.body().string();
-                //Log.d(TAG, "onResponse: 天气信息：" + weatherInfo);
-                Gson gson = new Gson();
-                WeatherInfo weatherInfos = gson.fromJson(weatherInfo, WeatherInfo.class);
-                List<WeatherInfo.HeWeatherBean> heWeather = weatherInfos.getHeWeather();
-                WeatherInfo.HeWeatherBean heWeatherBean = heWeather.get(0);
-                final WeatherInfo.HeWeatherBean.AqiBean aqi = heWeatherBean.getAqi();
-                final WeatherInfo.HeWeatherBean.BasicBean basic = heWeatherBean.getBasic();
-                final List<WeatherInfo.HeWeatherBean.DailyForecastBean> dailyForecast = heWeatherBean.getDaily_forecast();
+                if (response != null) {
+                    String weatherInfo = response.body().string();
+                    //Log.d(TAG, "onResponse: 天气信息：" + weatherInfo);
+                    Gson gson = new Gson();
+                    WeatherInfo weatherInfos = gson.fromJson(weatherInfo, WeatherInfo.class);
+                    List<WeatherInfo.HeWeatherBean> heWeather = weatherInfos.getHeWeather();
+                    WeatherInfo.HeWeatherBean heWeatherBean = heWeather.get(0);
+                    final WeatherInfo.HeWeatherBean.AqiBean aqi = heWeatherBean.getAqi();
+                    final WeatherInfo.HeWeatherBean.BasicBean basic = heWeatherBean.getBasic();
+                    final List<WeatherInfo.HeWeatherBean.DailyForecastBean> dailyForecast = heWeatherBean.getDaily_forecast();
 
-                List<WeatherInfo.HeWeatherBean.HourlyForecastBean> hourlyForecast = heWeatherBean.getHourly_forecast();
-                WeatherInfo.HeWeatherBean.NowBean now = heWeatherBean.getNow();
-                final WeatherInfo.HeWeatherBean.SuggestionBean suggestion = heWeatherBean.getSuggestion();
-                String status = heWeatherBean.getStatus();
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "run: 集合热：" + dailyForecast.size());
-                        tvTitle.setText(basic.getCity());
-                        degreeText.setText(dailyForecast.get(0).getTmp().getMax() + "℃");
-                        weatherInfoText.setText(dailyForecast.get(0).getCond().getTxt_d());
-                        dirText.setText(dailyForecast.get(0).getWind().getDir());
-                        scText.setText(dailyForecast.get(0).getWind().getSc() + "级");
+                    List<WeatherInfo.HeWeatherBean.HourlyForecastBean> hourlyForecast = heWeatherBean.getHourly_forecast();
+                    WeatherInfo.HeWeatherBean.NowBean now = heWeatherBean.getNow();
+                    final WeatherInfo.HeWeatherBean.SuggestionBean suggestion = heWeatherBean.getSuggestion();
+                    String status = heWeatherBean.getStatus();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            swipeRefreshLayout.setRefreshing(false);
+                            Log.d(TAG, "run: 集合热：" + dailyForecast.size());
+                            tvTitle.setText(basic.getCity());
+                            degreeText.setText(dailyForecast.get(0).getTmp().getMax() + "℃");
+                            weatherInfoText.setText(dailyForecast.get(0).getCond().getTxt_d());
+                            dirText.setText(dailyForecast.get(0).getWind().getDir());
+                            scText.setText(dailyForecast.get(0).getWind().getSc() + "级");
 
-                        View view = View.inflate(UIUtils.getContext(), R.layout.hourly_forecast_item, null);
-                        TextView hourlyForecastItemText = (TextView) view.findViewById(R.id.hourly_forecast_time_text);
-                        //hourlyForecastItemText.setText();
-                        hourlyForecastLayout.addView(view);
-                        airQualityText.setText(aqi.getCity().getQlty());
-                        aqiText.setText(aqi.getCity().getAqi());
-                        pm25Text.setText(aqi.getCity().getPm25());
-                        pm10Text.setText(aqi.getCity().getPm10());
-                        tvUpdateTime.setText(basic.getUpdate().getLoc());
-                        comfortText.setText(suggestion.getComf().getTxt());
-                        wearText.setText(suggestion.getTrav().getTxt());
-                        fluText.setText(suggestion.getFlu().getTxt());
-                        carWashText.setText(suggestion.getCw().getTxt());
-                        sportText.setText(suggestion.getSport().getTxt());
-                        travelText.setText(suggestion.getDrsg().getTxt());
-                        ultravioletRayText.setText(suggestion.getUv().getTxt());
-                    }
-                });
+                            View view = View.inflate(UIUtils.getContext(), R.layout.hourly_forecast_item, null);
+                            TextView hourlyForecastItemText = (TextView) view.findViewById(R.id.hourly_forecast_time_text);
+                            //hourlyForecastItemText.setText();
+                            hourlyForecastLayout.addView(view);
+                            airQualityText.setText(aqi.getCity().getQlty());
+                            aqiText.setText(aqi.getCity().getAqi());
+                            pm25Text.setText(aqi.getCity().getPm25());
+                            pm10Text.setText(aqi.getCity().getPm10());
+                            tvUpdateTime.setText(basic.getUpdate().getLoc());
+                            comfortText.setText(suggestion.getComf().getTxt());
+                            wearText.setText(suggestion.getTrav().getTxt());
+                            fluText.setText(suggestion.getFlu().getTxt());
+                            carWashText.setText(suggestion.getCw().getTxt());
+                            sportText.setText(suggestion.getSport().getTxt());
+                            travelText.setText(suggestion.getDrsg().getTxt());
+                            ultravioletRayText.setText(suggestion.getUv().getTxt());
+                        }
+                    });
+                }
             }
         });
     }
